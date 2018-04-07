@@ -52,7 +52,7 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
             obj.type = 'missile';
             obj.status = 'cruising';
             %obj.initial_speed = 0;
-            obj.cruise_speed = 1;
+            obj.cruise_speed = 5;
             
             obj.setPlotter();
             obj.run_interval = 1;

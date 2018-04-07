@@ -2,7 +2,7 @@ function setupScenario(radarAgents,satelliteAgents,missileAgents)%,interceptorAg
     %missileAgents,aerialAgents,cyberAgents)
 
 radar_locations         = xlsread('+iamd/+models/inputs.xlsx','Sensors','B2:D5','basic');
-radar_ranges            = xlsread('+iamd/+models/inputs.xlsx','Sensors','E2:E5','basic');
+radar_ranges            = xlsread('+iamd/+models/inputs.xlsx','Sensors','E2:D5','basic');
 sat_locations           = xlsread('+iamd/+models/inputs.xlsx','Sensors','I2:K5','basic');
 sat_ranges              = xlsread('+iamd/+models/inputs.xlsx','Sensors','L2:L2','basic');
 missile_start_loc       = xlsread('+iamd/+models/inputs.xlsx','Threats','B3:D4','basic');
@@ -19,12 +19,7 @@ iamd.funcs.Plotter.setup(bounds);
     
     function bounds = findPlottingBounds()
         x_min = 0;
-        x_max = 50;
-        y_min = 0;
-        y_max = 50;
-        bounds.xLim = [x_min x_max];
-        bounds.yLim = [y_min y_max];
-    end
+        x_
 
 for ii=1:length(radarAgents)
     radarAgents{ii}.setRadarId(ii);
@@ -44,5 +39,9 @@ for ii=1:length(missileAgents)
     missileAgents{ii}.setOrigin(missile_start_loc(ii,:));
     missileAgents{ii}.setDestination(missile_end_loc(ii,:));
 end
-   
-end
+
+    
+
+
+
+    

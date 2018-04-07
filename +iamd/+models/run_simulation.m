@@ -6,7 +6,7 @@ import publicsim.*;
 logpath = './tmp/scenario';
 simInst = publicsim.sim.Instance(logpath);
 simTimes.startTime  = 0;
-simTimes.endTime    = 200;
+simTimes.endTime    = 100;
 
 obsMgr       = funcs.groups.ObjectManager(0);%#ok<*AGROW>
 agentMgr     = funcs.groups.TopicGroup();%#ok<*AGROW>

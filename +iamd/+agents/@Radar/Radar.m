@@ -30,15 +30,14 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
         aerial_broad_topic
         radar_knockout_topic
         last_update_time
-        run_interval
+        run_interval 
         
         plotter
         
     end
     
     properties (SetAccess=private)
-        type
-        plotter
+        type       
     end
     
     properties (Constant)
@@ -57,7 +56,15 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
     methods
         function obj = Radar()
             obj = obj@publicsim.agents.base.Periodic ();
-            obj = obj@publicsim.agents.base.Networked();                        
+            obj = obj@publicsim.agents.base.Networked();
+            
+            obj.setPlotter();
+            
+            obj.type = 'radar';
+            obj.status = 'normal';
+            
+            obj.run_interval = 1;
+            obj.last_update_time = -1;
             
         end
         
@@ -79,13 +86,7 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
             obj.subscribeToTopic(obj.aerial_assign_topic);
             obj.subscribeToTopic(obj.aerial_broad_topic);
             obj.subscribeToTopic(obj.radar_knockout_topic);
-            
-            obj.type = 'radar';
-            obj.status = 'online';
-            
-            obj.setPlotter();
-            
-            
+          
             obj.setLogLevel(publicsim.sim.Logger.log_INFO);
             obj.scheduleAtTime(0);
             
@@ -97,14 +98,14 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
                 
                 
                 % detect and report targets
-                obj.detectTargets(time);
+                %obj.detectTargets(time);
                 
                 % Update Plot
-                plot_info.type  = obj.type;
+                plot_info.type = obj.type;
                 plot_info.range = obj.range;
                 plot_info.radar_id = obj.radar_id;
                 plot_info.status= obj.status;
-                
+
                 obj.plotter.updatePlot(obj.radar_location,plot_info);
                 
                 % Update scheduler
@@ -144,24 +145,14 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
             obj.radar_location = radar_position;
         end
         
+        
         function setPlotter(obj)
-            marker = obj.setMarker();
+
             obj.plotter = iamd.funcs.Plotter();
         end
         
-%         function setPlotter(obj)
-%             marker = obj.setMarker();
-%             obj.plotter = iamd.funcs.Plotter();
-%         end
-        
     end
     
-    methods (Static)
-        function marker = setMarker()
-            marker.type         = 'o';
-            marker.size         = 6;
-            marker.edgeColor    = 'k';
-            marker.faceColor    = 'b';
     %%%% TEST METHODS %%%%
     
     methods (Static, Access = {?publicsim.tests.UniversalTester})
