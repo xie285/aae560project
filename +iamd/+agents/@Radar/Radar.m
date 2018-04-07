@@ -3,7 +3,8 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
         publicsim.agents.base.Networked
     % fixed location. Take measurements at interval. Missile intercept
     % capabilities? Differentiate between types (i.e. type I has missile
-    % intercept capability, type II is S&T only)
+    % intercept capability, type II is S&T only), maybe create entirely new
+    % missile battery agent
     properties
         
         status  % to be affected by cyber - Possible states: online (normal), online (alert), hacked (slower response), offline 
@@ -35,6 +36,11 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
         
     end
     
+    properties (SetAccess=private)
+        type
+        plotter
+    end
+    
     properties (Constant)
         
         % Topic Subscriptions
@@ -51,9 +57,7 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
     methods
         function obj = Radar()
             obj = obj@publicsim.agents.base.Periodic ();
-            obj = obj@publicsim.agents.base.Networked();
-            
-            obj.status = 'online';
+            obj = obj@publicsim.agents.base.Networked();                        
             
         end
         
@@ -76,6 +80,12 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
             obj.subscribeToTopic(obj.aerial_broad_topic);
             obj.subscribeToTopic(obj.radar_knockout_topic);
             
+            obj.type = 'radar';
+            obj.status = 'online';
+            
+            obj.setPlotter();
+            
+            
             obj.setLogLevel(publicsim.sim.Logger.log_INFO);
             obj.scheduleAtTime(0);
             
@@ -93,7 +103,7 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
                 plot_info.type  = obj.type;
                 plot_info.range = obj.range;
                 plot_info.radar_id = obj.radar_id;
-                plot_info.operation_mode= obj.operation_mode;
+                plot_info.status= obj.status;
                 
                 obj.plotter.updatePlot(obj.radar_location,plot_info);
                 
@@ -134,6 +144,11 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
             obj.radar_location = radar_position;
         end
         
+        function setPlotter(obj)
+            marker = obj.setMarker();
+            obj.plotter = iamd.funcs.Plotter();
+        end
+        
 %         function setPlotter(obj)
 %             marker = obj.setMarker();
 %             obj.plotter = iamd.funcs.Plotter();
@@ -141,6 +156,12 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
         
     end
     
+    methods (Static)
+        function marker = setMarker()
+            marker.type         = 'o';
+            marker.size         = 6;
+            marker.edgeColor    = 'k';
+            marker.faceColor    = 'b';
     %%%% TEST METHODS %%%%
     
     methods (Static, Access = {?publicsim.tests.UniversalTester})
