@@ -1,8 +1,9 @@
 classdef Missile < publicsim.agents.hierarchical.Child  &...        
         publicsim.agents.base.Periodic                  &...
         publicsim.agents.base.Networked                 &...
-        publicsim.agents.base.Movable                   &...
-        publicsim.agents.physical.Destroyable          
+        publicsim.agents.base.Movable                 
+%         publicsim.agents.physical.Destroyable
+    % TODO: randomized origin 
     
     properties
         initial_speed
@@ -12,6 +13,7 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
     end
     
     properties (SetAccess=protected)
+        isDestroyed
         scheduleTime
         missile_id
         heatSig
@@ -20,6 +22,8 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
         direction
         
         missile_broad_topic
+        missile_destroy_topic
+%         missile_call_topic
         radar_knockout_topic
         last_update_time
         run_interval
@@ -33,6 +37,8 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
     
     properties (Constant)
         MISSILE_BROADCAST_TOPIC_KEY     = 'MISSILE_BROADCAST';
+        MISSILE_DESTROY_TOPIC_KEY       = 'MISSILE_DESTROY';
+%         MISSILE_CALL_TOPIC_KEY          = 'MISSILE_CALL';
         RADAR_KNOCKOUT_TOPIC_KEY        = 'RADAR_KNOCKOUT';
         % possible to add command knockout at some point
     end
@@ -46,16 +52,18 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
             %obj = obj@publicsim.agents.base.Detectable();
             obj = obj@publicsim.agents.base.Movable();
             %obj = obj@publicsim.agents.physical.Impactable();
-            obj = obj@publicsim.agents.physical.Destroyable();
+%             obj = obj@publicsim.agents.physical.Destroyable();
             obj = obj@publicsim.agents.base.Networked();            
+       
             
             obj.type = 'missile';
             obj.status = 'cruising';
             %obj.initial_speed = 0;
-            obj.cruise_speed = 1;
+            obj.cruise_speed = 20;
             
             obj.setPlotter();
             obj.run_interval = 1;
+            
         end
                 
         function init(obj)
@@ -63,44 +71,61 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
             obj.setMovementManager(obj)
             obj.setLocation(obj.origin)
             
+            obj.isDestroyed = 0;
+            
             obj.missile_broad_topic = obj.getDataTopic(obj.MISSILE_BROADCAST_TOPIC_KEY,'','');
+            obj.missile_destroy_topic = obj.getDataTopic(obj.MISSILE_DESTROY_TOPIC_KEY,'','');
+%             obj.missile_call_topic = obj.getDataTopic(obj.MISSILE_CALL_TOPIC_KEY,'','');
             obj.radar_knockout_topic = obj.getDataTopic(obj.RADAR_KNOCKOUT_TOPIC_KEY,'','');
-            
-            obj.subscribeToTopic(obj.missile_broad_topic);
+
             obj.subscribeToTopic(obj.radar_knockout_topic);
-            
+%             obj.subscribeToTopic(obj.missile_call_topic);
+
             obj.setLogLevel(publicsim.sim.Logger.log_INFO);
+
             obj.scheduleAtTime(obj.scheduleTime)
             
-            if obj.scheduleTime == 0
-                obj.last_update_time = -1;
-            else
-                obj.last_update_time = obj.scheduleTime - 1;
-            end
+            obj.last_update_time = obj.scheduleTime - 1;
+
+
         end
         
         function runAtTime(obj,time)
             
-            obj.disp_INFO(['Missile Launched at ' num2str(time) ' s!' '\n'])
-
-            if (time - obj.last_update_time >= obj.run_interval)
-
-                time_since_update = time - obj.last_update_time;
-
-                plot_info.type = obj.type;
-                plot_info.missile_id = obj.missile_id;
-                plot_info.status = obj.status;
-                obj.plotter.updatePlot(obj.location,plot_info);
-
-                updateLocation(obj,time_since_update)
-                
-                obj.scheduleAtTime(time+1);
+            if time == obj.scheduleTime  
+                obj.disp_INFO(['Missile Launched at ' num2str(time) ' s!' '\n'])
             end
+            
+            if (time - obj.last_update_time >= obj.run_interval) 
+                
+                time_since_update = time - obj.last_update_time;
+                obj.subscribeToTopic(obj.missile_destroy_topic);               
+                % check if missile has been shot down by battery
+                obj.isIntercepted();
+                
+                if obj.isDestroyed == 0
+                    obj.detectable();
 
-            obj.location
+                    plot_info.type = obj.type;
+                    plot_info.missile_id = obj.missile_id;
+                    plot_info.status = obj.status;
+                    obj.plotter.updatePlot(obj.location,plot_info);
+                    
+                    
+                    updateLocation(obj,time_since_update)
+                    
+                    obj.scheduleAtTime(time+1)
+                end
+
+                    
+                                                             
+            end
+           
             % record last time step stamp
             obj.last_update_time = time;
         end
+        
+
         
         function updateLocation(obj,time_since_update)
             obj.setDirection(obj.destination)
@@ -112,8 +137,40 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
             obj.direction = (destination - obj.location) / norm(destination - obj.location);
         end
         
-        function setScheduleTime(obj,time)
-            obj.scheduleTime = time;
+        function detectable(obj)
+            % function that broadcasts current position of missile for any
+            % radar or satellite to detect
+            msg = struct;
+            msg.missile_id = obj.missile_id;
+            msg.missile_location = obj.location;
+            msg.missile_cruise_speed = obj.cruise_speed;
+            msg.missile_vector = obj.direction;
+
+            obj.publishToTopic(obj.missile_broad_topic,msg);
+            
+        end
+        
+        function isIntercepted(obj)
+            [topics,msg] = obj.getNewMessages();
+  
+            for ii = 1:length(topics)
+                
+                if isequal(topics{ii}.type,obj.MISSILE_DESTROY_TOPIC_KEY)
+                    if ~isempty(msg{ii}.missile_destroy_id)
+                        if obj.missile_id == msg{ii}.missile_destroy_id
+                            obj.isDestroyed = 1;
+                            obj.status = 'intercepted';
+%                             obj.location = [-1 -1 0];
+%                             obj.cruise_speed = 0;
+%                             obj.direction = 0;
+                        end
+                    end
+                end
+            end            
+        end
+        
+        function setScheduleTime(obj,spawn_time)
+            obj.scheduleTime = spawn_time;
         end
         
         function setMissileId(obj,id)
