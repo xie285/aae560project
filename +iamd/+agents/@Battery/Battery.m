@@ -1,21 +1,15 @@
-classdef Battery < publicsim.agents.hierarchical.Child   & ...
+classdef Battery < publicsim.agents.hierarchical.Child      & ...
         publicsim.agents.base.Periodic                      & ...
         publicsim.agents.base.Networked
     
     properties
         
         status
-        
-        missile_id
-        missile_location
-        missile_vector
-        
+       
         assigned_missile_ids
-        
-        intercepted_missiles
-        time_of_intercept
-        
-        intercept_data
+
+        intercepted_missile_list
+        interception_times
         
         num_intercepts
     end
@@ -33,11 +27,15 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
         missile_destroy_topic
         
         self_effectiveness
+        pIntercept
+        pReceiveCommunications
         
-        pDetect_normal = 100;
-        pDetect_alert = 100;
-        pDetect_hacked = 20;
-        pDetect_offline = 0;
+%         pIntercept_normal = 100;
+%         pIntercept_hacked = 20;
+%         pDetect_offline = 0;
+%         
+%         pReceiveCommunications_normal = 100;
+%         pReceiveCommunications_hacked = 20;
         
         last_update_time
         run_interval
@@ -48,6 +46,14 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
     
     properties (SetAccess=private)
         type
+        
+        missile_id
+        missile_location
+        missile_vector
+        
+        intercepted_missiles
+        time_of_intercept
+        
         sim_end_time
     end
     
@@ -80,6 +86,9 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
         end
         
         function init(obj)
+            
+            obj.selfEffectiveness(obj.self_effectiveness)
+            
             obj.battery_status_topic = obj.getDataTopic(obj.BATTERY_STATUS_TOPIC_KEY,'','');
 %             obj.battery_broad_topic = obj.getDataTopic(obj.BATTERY_BROAD_TOPIC_KEY,'','');
             
@@ -106,10 +115,14 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
                 
                 obj.broadcastBatteryStatus()
                 % receive any missile target assignments from command
-                obj.getInterceptOrders(topics,msg)
+                if randi(100,1,1) <= obj.pReceiveCommunications
+                    obj.getInterceptOrders(topics,msg)
+                end
                 
-                % destroy any assigned missiles in range 
-                obj.interceptMissile(time);
+                % destroy any assigned missiles in range
+                if randi(100,1,1) <= obj.pIntercept
+                    obj.interceptMissile(time);
+                end
 
                 % Update Plot
                 plot_info.type  = obj.type;
@@ -136,19 +149,34 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
                 number_of_intercepts = length(unique(obj.intercepted_missiles));
                 fprintf('Battery %d: \n', obj.battery_id)
                 fprintf('Number of Intercepts  = %d \n',number_of_intercepts)               
-                [unq,ia] = unique(obj.intercepted_missiles,'stable');
-                unqt = [];
+                [obj.intercepted_missile_list,ia] = unique(obj.intercepted_missiles,'stable');
+                obj.interception_times = [];
                 for i = 1:length(obj.time_of_intercept)
                     for j = 1:length(ia)
                         if i == ia(j)
-                            unqt = [unqt,obj.time_of_intercept(i)];
+                            obj.interception_times = [obj.interception_times,obj.time_of_intercept(i)];
                         end
                     end
                 end
-                ids = sprintf('%d ',unq);
-                toi = sprintf('%d ',unqt);
+
+                ids = sprintf('%d ',obj.intercepted_missile_list);
+                toi = sprintf('%d ',obj.interception_times);
                 fprintf('Intercepted MissileID = %s \n',ids)
                 fprintf('Interception Times = %s \n', toi)
+                data = [obj.intercepted_missile_list; obj.interception_times];
+                    
+                if obj.battery_id == 1
+                    fileID = fopen('+iamd/+models/data/battery.txt','w');
+                    fprintf(fileID, 'Battery Data: Intercepted Missile IDs and Interception Times\r\n\r\n');
+                    fprintf(fileID, 'Battery1 \r\n');
+                    fprintf(fileID,'%d  %d \r\n',data);
+                    fclose(fileID);
+                else
+                    fileID = fopen('+iamd/+models/data/battery.txt','a');
+                    fprintf(fileID, '\r\nBattery%d \r\n', obj.battery_id);
+                    fprintf(fileID,'%d  %d \r\n',data);
+                    fclose(fileID);
+                end
             end
         end
         
@@ -190,16 +218,9 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
                                 obj.publishToTopic(obj.missile_destroy_topic,msg);
                                 
                                 obj.intercepted_missiles = [obj.intercepted_missiles, obj.missile_id{j}];
-%                                 [obj.intercepted_missiles,ia] = unique(obj.intercepted_missiles,'stable');
-%                                 obj.num_intercepts = length(obj.intercepted_missile_list);                            
+                          
                                 obj.time_of_intercept = [obj.time_of_intercept,time];
-%                                 for k = 1:length(obj.time_of_intercept)
-%                                     if k == ia
-%                                         obj.intercept_data = [obj.intercepted_missiles; obj.time_of_intercept(k)]
-%                                     end
-%                                 end
-                                
-                                
+                                                                
                             end
                         end
                     end
@@ -209,48 +230,21 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
         end
         
         function detectMissiles(obj,topics,msg)
-%             [topics,msg] = obj.getNewMessages();
             
             kk=1;
             
             for ii = 1:length(topics)
                 
                 if isequal(topics{ii}.type,obj.MISSILE_BROADCAST_TOPIC_KEY)
-                    if norm(obj.battery_location - msg{ii}.missile_location) <= obj.range
-                        switch obj.status
-                            case {'normal'}
-                                if randi(100,1,1) <= obj.pDetect_normal
-                                    obj.missile_location{kk}    = msg{ii}.missile_location;
-                                    obj.missile_id{kk}          = msg{ii}.missile_id;
-                                    obj.missile_vector{kk}      = msg{ii}.missile_vector;
-                                    % remove empty cell array contents
-                                    obj.missile_location = obj.missile_location(~cellfun('isempty',obj.missile_location));
-                                    obj.missile_id = obj.missile_id(~cellfun('isempty',obj.missile_id));
-                                    obj.missile_vector = obj.missile_vector(~cellfun('isempty',obj.missile_vector));
-                                end
-                            case {'alert'}
-                                if randi(100,1,1) <= obj.pDetect_alert
-                                    obj.missile_location{kk}    = msg{ii}.missile_location;
-                                    obj.missile_id{kk}          = msg{ii}.missile_id;
-                                    obj.missile_vector{kk}      = msg{ii}.missile_vector;
-                                    % remove empty cell array contents
-                                    obj.missile_location = obj.missile_location(~cellfun('isempty',obj.missile_location));
-                                    obj.missile_id = obj.missile_id(~cellfun('isempty',obj.missile_id));
-                                    obj.missile_vector = obj.missile_vector(~cellfun('isempty',obj.missile_vector));
-                                end
-                            case {'hacked'}
-                                if randi(100,1,1) <= obj.pDetect_hacked
-                                    obj.missile_location{kk}    = msg{ii}.missile_location;
-                                    obj.missile_id{kk}          = msg{ii}.missile_id;
-                                    obj.missile_vector{kk}      = msg{ii}.missile_vector;
-                                    % remove empty cell array contents
-                                    obj.missile_location = obj.missile_location(~cellfun('isempty',obj.missile_location));
-                                    obj.missile_id = obj.missile_id(~cellfun('isempty',obj.missile_id));
-                                    obj.missile_vector = obj.missile_vector(~cellfun('isempty',obj.missile_vector));
-                                end
-                            case {'offline'}
-                                % do nothing
-                        end
+                    if norm(obj.battery_location - msg{ii}.missile_location) <= obj.range                         
+                        obj.missile_location{kk}    = msg{ii}.missile_location;
+                        obj.missile_id{kk}          = msg{ii}.missile_id;
+                        obj.missile_vector{kk}      = msg{ii}.missile_vector;
+                        % remove empty cell array contents
+                        obj.missile_location = obj.missile_location(~cellfun('isempty',obj.missile_location));
+                        obj.missile_id = obj.missile_id(~cellfun('isempty',obj.missile_id));
+                        obj.missile_vector = obj.missile_vector(~cellfun('isempty',obj.missile_vector)); 
+                        
                         kk = kk+1;
                     end
                 end
@@ -269,6 +263,15 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
             msg.battery_range       = obj.range;
             
             obj.publishToTopic(obj.battery_status_topic,msg);
+        end
+        
+        function selfEffectiveness(obj,SE)
+            obj.pIntercept = 100;
+            obj.pReceiveCommunications = SE;            
+        end
+        
+        function setSE(obj,SE)
+            obj.self_effectiveness = SE;
         end
         
         function setBatteryId(obj,id)
@@ -298,12 +301,17 @@ classdef Battery < publicsim.agents.hierarchical.Child   & ...
         function setEndTime(obj,time)
             obj.sim_end_time = time;
         end
+        
+        function intercept_data = getInterceptData(obj)
+            intercept_data = obj.interception_times;
+            
+        end
     end
     
-    methods (Static)
+    methods (Static,Access=private)
         function addPropertyLogs(obj)
             
-            obj.addPeriodicLogItems({'getStatus'});
+            obj.addPeriodicLogItems({'getInterceptData'});
             
         end
     end

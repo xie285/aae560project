@@ -41,9 +41,9 @@ simInst.runUntil(simTimes.startTime,simTimes.endTime);
 % access log files for data from simulation
 logger = publicsim.sim.Logger(logpath);
 logger.restore()
-% 
-% duration = simTimes.endTime - simTimes.startTime;
-% parsed_data = iamd.funcs.parseLogs(logpath,batteryAgents,duration);
-% iamd.models.processData(parsed_data,batteryAgents)
+
+duration = simTimes.endTime - simTimes.startTime;
+parsed_data = iamd.funcs.parseLogs(logpath,batteryAgents,duration);
+% data = iamd.models.processData(parsed_data,batteryAgents)
 
 end

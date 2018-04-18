@@ -71,7 +71,16 @@ classdef Plotter < handle
                             
                         case {'hacked'}
                             
-                            % do something
+                            if isempty(obj.plot_handle)
+                                obj.plot_handle = plot3(x,y,z,'Marker','o','MarkerSize',8,'MarkerFaceColor','b','MarkerEdgeColor','r');
+                                obj.plot_handle = plot3(plot_info.range*cos(obj.t)+x,plot_info.range*sin(obj.t)+y,obj.t*0,'b--');
+                                view(2)
+                                drawnow
+                            else
+                                set(obj.plot_handle,'XData',x,'YData',y,'ZData',z);
+                                plot3(plot_info.range*cos(obj.t)+x,plot_info.range*sin(obj.t)+y,obj.t*0,'r--');
+                                text(x+0.5,y+0.5,z,['Satellite' num2str(plot_info.sat_id)],'Color','black')
+                            end
                             
                         case {'offline'}
                             
@@ -96,7 +105,14 @@ classdef Plotter < handle
                             
                         case {'hacked'}
                             
-                            % do something
+                            if isempty(obj.plot_handle)
+                                obj.plot_handle = plot3(x,y,z,'Marker','d','MarkerSize',8,'MarkerFaceColor','y','MarkerEdgeColor','r'); 
+                                view(2)
+                                drawnow
+                            else
+                                set(obj.plot_handle,'XData',x,'YData',y,'ZData',z);
+                                text(x+0.5,y+0.5,z,['Command' num2str(plot_info.command_id)],'Color','black')
+                            end
                             
                         case {'offline'}
                             

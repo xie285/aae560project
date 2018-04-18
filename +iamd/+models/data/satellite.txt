@@ -1,0 +1,13 @@
+Satellite 1 Data: Time vs Number of Cues Successfully sent
+
+11  0 
+23  2 
+24  2 
+31  2 
+44  5 
+47  5 
+55  5 
+65  7 
+100  10 
+113  10 
+121  10 

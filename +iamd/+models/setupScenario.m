@@ -3,21 +3,20 @@ function setupScenario(radarAgents,satelliteAgents,commandAgents,missileAgents,b
 
 radar_locations         = xlsread('+iamd/+models/inputs2.xlsx','Friendly','B2:D4','basic');
 radar_ranges            = xlsread('+iamd/+models/inputs2.xlsx','Friendly','E2:E4','basic');
-radar_interceptors      = xlsread('+iamd/+models/inputs2.xlsx','Friendly','F2:F4','basic');
+radar_se                = xlsread('+iamd/+models/inputs2.xlsx','Friendly','F2:F4','basic');
 
 battery_locations       = xlsread('+iamd/+models/inputs2.xlsx','Friendly','V2:X5','basic');
 battery_ranges          = xlsread('+iamd/+models/inputs2.xlsx','Friendly','Y2:Y5','basic');
-battery_arsenal         = xlsread('+iamd/+models/inputs2.xlsx','Friendly','Z2:Z5','basic');
+battery_se              = xlsread('+iamd/+models/inputs2.xlsx','Friendly','Z2:Z5','basic');
 
 sat_locations           = xlsread('+iamd/+models/inputs2.xlsx','Friendly','I2:K5','basic');
 sat_ranges              = xlsread('+iamd/+models/inputs2.xlsx','Friendly','L2:L2','basic');
+sat_se                  = xlsread('+iamd/+models/inputs2.xlsx','Friendly','M2','basic');
+
 command_location        = xlsread('+iamd/+models/inputs2.xlsx','Friendly','P2:R2','basic');
+command_se              = xlsread('+iamd/+models/inputs2.xlsx','Friendly','S2','basic');
 
 sim_end_time            = xlsread('+iamd/+models/inputs2.xlsx','Simulation','B2','basic');
-
-% missile_start_loc       = xlsread('+iamd/+models/inputs2.xlsx','Threats','B3:D4','basic');
-% missile_end_loc         = xlsread('+iamd/+models/inputs2.xlsx','Threats','E3:G4','basic');
-% missile_time_launch     = xlsread('+iamd/+models/inputs2.xlsx','Threats','H3:H4','basic');
 
 % missile spawn matrix
 % for trial of m missiles
@@ -54,7 +53,8 @@ for ii=1:length(radarAgents)
     radarAgents{ii}.setRadarId(ii);
     radarAgents{ii}.setRadarLocation(radar_locations(ii,:));
     radarAgents{ii}.setRadarRange(radar_ranges(ii));
-    radarAgents{ii}.augmentArsenal(radar_interceptors(ii));
+    radarAgents{ii}.setEndTime(sim_end_time);
+    radarAgents{ii}.setSE(radar_se(ii,:));
 end
 
 for ii=1:length(batteryAgents)
@@ -62,17 +62,22 @@ for ii=1:length(batteryAgents)
     batteryAgents{ii}.setBatteryLocation(battery_locations(ii,:));
     batteryAgents{ii}.setBatteryRange(battery_ranges(ii));
     batteryAgents{ii}.setEndTime(sim_end_time);
+    batteryAgents{ii}.setSE(battery_se(ii,:));
 end
 
 for ii=1:length(satelliteAgents)
     satelliteAgents{ii}.setSatelliteId(ii);
     satelliteAgents{ii}.setSatelliteLocation(sat_locations(ii,:));
     satelliteAgents{ii}.setSatelliteRange(sat_ranges(ii));
+    satelliteAgents{ii}.setSE(sat_se(ii,:));
+    satelliteAgents{ii}.setEndTime(sim_end_time);
 end
 
 for ii = 1:length(commandAgents)
     commandAgents{ii}.setCommandId(ii);
     commandAgents{ii}.setCommandLocation(command_location(ii,:));
+    commandAgents{ii}.setSE(command_se(ii,:));
+    commandAgents{ii}.setEndTime(sim_end_time);
 end
 
 for ii=1:length(missileAgents)

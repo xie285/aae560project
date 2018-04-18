@@ -23,8 +23,7 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
         
         missile_broad_topic
         missile_destroy_topic
-%         missile_call_topic
-        radar_knockout_topic
+
         last_update_time
         run_interval
         
@@ -38,8 +37,6 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
     properties (Constant)
         MISSILE_BROADCAST_TOPIC_KEY     = 'MISSILE_BROADCAST';
         MISSILE_DESTROY_TOPIC_KEY       = 'MISSILE_DESTROY';
-%         MISSILE_CALL_TOPIC_KEY          = 'MISSILE_CALL';
-        RADAR_KNOCKOUT_TOPIC_KEY        = 'RADAR_KNOCKOUT';
         % possible to add command knockout at some point
     end
  
@@ -49,17 +46,13 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
         function obj = Missile()
             
             obj = obj@publicsim.agents.base.Periodic ();
-            %obj = obj@publicsim.agents.base.Detectable();
             obj = obj@publicsim.agents.base.Movable();
-            %obj = obj@publicsim.agents.physical.Impactable();
-%             obj = obj@publicsim.agents.physical.Destroyable();
             obj = obj@publicsim.agents.base.Networked();            
        
             
             obj.type = 'missile';
             obj.status = 'cruising';
-            %obj.initial_speed = 0;
-            obj.cruise_speed = 20;
+            obj.cruise_speed = 20;            
             
             obj.setPlotter();
             obj.run_interval = 1;
@@ -72,14 +65,11 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
             obj.setLocation(obj.origin)
             
             obj.isDestroyed = 0;
+            obj.location = obj.origin;
+            obj.setDirection(obj.destination)            
             
             obj.missile_broad_topic = obj.getDataTopic(obj.MISSILE_BROADCAST_TOPIC_KEY,'','');
             obj.missile_destroy_topic = obj.getDataTopic(obj.MISSILE_DESTROY_TOPIC_KEY,'','');
-%             obj.missile_call_topic = obj.getDataTopic(obj.MISSILE_CALL_TOPIC_KEY,'','');
-            obj.radar_knockout_topic = obj.getDataTopic(obj.RADAR_KNOCKOUT_TOPIC_KEY,'','');
-
-            obj.subscribeToTopic(obj.radar_knockout_topic);
-%             obj.subscribeToTopic(obj.missile_call_topic);
 
             obj.setLogLevel(publicsim.sim.Logger.log_INFO);
 

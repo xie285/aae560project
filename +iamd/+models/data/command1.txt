@@ -1,0 +1,12 @@
+Command 1 Data: Assigned Missile ID and Time of Assignment
+
+1  18 
+2  26 
+3  34 
+4  47 
+5  61 
+6  70 
+7  75 
+8  86 
+9  95 
+10  108 
