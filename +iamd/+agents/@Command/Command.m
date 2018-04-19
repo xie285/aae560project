@@ -216,18 +216,25 @@ classdef Command < publicsim.agents.hierarchical.Parent     & ...
                         end
                     end
                 end
-                fprintf('Command %d: \n', obj.command_id)
-                ids = sprintf('%d ',obj.assigned_missiles);
-                tod = sprintf('%d ',obj.time_of_assignment);
-                fprintf('Assigned MissileID = %s \n', ids)
-                fprintf('Time of Assignment = %s \n',tod)
+%                 fprintf('Command %d: \n', obj.command_id)
+%                 ids = sprintf('%d ',obj.assigned_missiles);
+%                 tod = sprintf('%d ',obj.time_of_assignment);
+%                 fprintf('Assigned MissileID = %s \n', ids)
+%                 fprintf('Time of Assignment = %s \n',tod)
                 
-                data = [obj.assigned_missiles; obj.time_of_assignment];
+                data_command = [obj.assigned_missiles' obj.time_of_assignment'];
                 
-                fileID = fopen('+iamd/+models/data/command1.txt','w');
-                fprintf(fileID, 'Command 1 Data: Assigned Missile ID and Time of Assignment\r\n\r\n');
-                fprintf(fileID,'%d  %d \r\n',data);
-                fclose(fileID);
+                filename = '+iamd/test_data.xlsx';
+                
+                if ~isempty(data_command)
+                    xlswrite(filename,data_command,'Command Data','A3')
+                end
+
+                
+%                 fileID = fopen('+iamd/+models/data/command1.txt','w');
+%                 fprintf(fileID, 'Command 1 Data: Assigned Missile ID and Time of Assignment\r\n\r\n');
+%                 fprintf(fileID,'%d  %d \r\n',data);
+%                 fclose(fileID);
             end
         end
         

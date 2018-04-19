@@ -138,11 +138,15 @@ classdef Satellite <  publicsim.agents.hierarchical.Child   & ...
             obj.last_update_time = time;
             
             if time == obj.sim_end_time
-                data = [obj.time_of_broadcast_list; obj.num_cues];
-                fileID = fopen('+iamd/+models/data/satellite.txt','w');
-                fprintf(fileID, 'Satellite 1 Data: Time vs Number of Cues Successfully sent\r\n\r\n');
-                fprintf(fileID,'%d  %d \r\n',data);
-                fclose(fileID);
+                data_satellite = [obj.time_of_broadcast_list' obj.num_cues'];
+                filename = '+iamd/test_data.xlsx';
+                if ~isempty(data_satellite)
+                    xlswrite(filename,data_satellite,'Satellite Data','A3');
+                end
+%                 fileID = fopen('+iamd/+models/data/satellite.txt','w');
+%                 fprintf(fileID, 'Satellite 1 Data: Time vs Number of Cues Successfully sent\r\n\r\n');
+%                 fprintf(fileID,'%d  %d \r\n',data);
+%                 fclose(fileID);
             end
             
         end
@@ -241,7 +245,7 @@ classdef Satellite <  publicsim.agents.hierarchical.Child   & ...
         end
         
         function selfEffectiveness(obj,SE)
-            obj.pDetect = SE;
+            obj.pDetect = 0.2*SE;
             obj.pBroadcast = SE;
         end
         

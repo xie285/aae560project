@@ -42,8 +42,7 @@ simInst.runUntil(simTimes.startTime,simTimes.endTime);
 logger = publicsim.sim.Logger(logpath);
 logger.restore()
 
-duration = simTimes.endTime - simTimes.startTime;
-parsed_data = iamd.funcs.parseLogs(logpath,batteryAgents,duration);
-% data = iamd.models.processData(parsed_data,batteryAgents)
 
+% post processing
+iamd.analysis.Analysis(num_mis)
 end

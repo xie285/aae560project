@@ -181,26 +181,40 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
                         end
                     end
                 end
-                fprintf('Radar %d: \n', obj.radar_id)
-                ids = sprintf('%d ',obj.detected_missiles);
-                tod = sprintf('%d ',obj.time_of_detect);
-                fprintf('Detected MissileID = %s \n', ids)
-                fprintf('Fastest Detect Time = %s \n',tod)
+%                 fprintf('Radar %d: \n', obj.radar_id)
+%                 ids = sprintf('%d ',obj.detected_missiles);
+%                 tod = sprintf('%d ',obj.time_of_detect);
+%                 fprintf('Detected MissileID = %s \n', ids)
+%                 fprintf('Fastest Detect Time = %s \n',tod)
                 
-                data = [obj.detected_missiles; obj.time_of_detect];
-                
-                if obj.radar_id == 1
-                    fileID = fopen('+iamd/+models/data/radar.txt','w');
-                    fprintf(fileID, 'Radar Data: Detected Missile ID and Time of Detect\r\n\r\n');
-                    fprintf(fileID, 'Radar1 \r\n');
-                    fprintf(fileID,'%d  %d \r\n',data);
-                    fclose(fileID);
-                else
-                    fileID = fopen('+iamd/+models/data/radar.txt','a');
-                    fprintf(fileID, '\r\nRadar%d \r\n', obj.radar_id);
-                    fprintf(fileID,'%d  %d \r\n',data);
-                    fclose(fileID);
+                data_radar = [obj.detected_missiles' obj.time_of_detect'];
+                filename = '+iamd/test_data.xlsx';
+                switch obj.radar_id
+                    case 1
+                        if ~isempty(data_radar)
+                            xlswrite(filename,data_radar,'Radar Data','A3')
+                        end
+                    case 2
+                        if ~isempty(data_radar)
+                            xlswrite(filename,data_radar,'Radar Data','C3')
+                        end
+                    case 3
+                        if ~isempty(data_radar)
+                            xlswrite(filename,data_radar,'Radar Data','E3')
+                        end
                 end
+%                 if obj.radar_id == 1
+%                     fileID = fopen('+iamd/+models/data/radar.txt','w');
+%                     fprintf(fileID, 'Radar Data: Detected Missile ID and Time of Detect\r\n\r\n');
+%                     fprintf(fileID, 'Radar1 \r\n');
+%                     fprintf(fileID,'%d  %d \r\n',data);
+%                     fclose(fileID);
+%                 else
+%                     fileID = fopen('+iamd/+models/data/radar.txt','a');
+%                     fprintf(fileID, '\r\nRadar%d \r\n', obj.radar_id);
+%                     fprintf(fileID,'%d  %d \r\n',data);
+%                     fclose(fileID);
+%                 end
             end
             
         end       
@@ -252,26 +266,7 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
                                     end
                                             
                                 end
-%                             case {'hacked'}
-%                                 if randi(100,1,1) <= obj.pDetect_hacked
-%                                     obj.missile_location{kk}    = msg{ii}.missile_location;
-%                                     obj.missile_id{kk}          = msg{ii}.missile_id;
-%                                     obj.missile_vector{kk}      = msg{ii}.missile_vector;
-%                                     
-%                                     obj.time_of_detect_list = [obj.time_of_detect_list, time];                  
-%                                     obj.detected_missiles_list = [obj.detected_missiles_list, obj.missile_id{kk}];
-%                                     
-%                                     % remove empty cell array contents
-%                                     obj.missile_location = obj.missile_location(~cellfun('isempty',obj.missile_location));
-%                                     obj.missile_id = obj.missile_id(~cellfun('isempty',obj.missile_id));
-%                                     obj.missile_vector = obj.missile_vector(~cellfun('isempty',obj.missile_vector));
-%                                     
-%                                     if randi(100,1,1) <= obj.pBroadcast_hacked
-%                                         obj.broadcastDetectedMissiles
-%                                     end
-%                                 end
-                            case {'offline'}
-                                % do nothing
+
                         end
                         kk = kk+1;
                     end
@@ -329,7 +324,7 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
         end
         
         function selfEffectiveness(obj,SE)
-            obj.pDetect_normal = 0.4 * SE;
+            obj.pDetect_normal = 0.2 * SE;
             obj.pDetect_alert = SE;
             obj.pBroadcast = SE;
             obj.pReceiveCommunications = SE;

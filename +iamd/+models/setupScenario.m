@@ -28,7 +28,7 @@ y_i = [539 336 325 230 5 688 753 339 470 798]';
 z_i = zeros(m,1);
 % origin matrix
 missile_start_locations = [x_i y_i z_i];
-missile_spawn_times = [0 10 20 30 40 50 60 70 80 90 100]';
+missile_spawn_times = (0:m-1)*10;%[0 10 20 30 40 50 60 70 80 90 100]';
 % missiles travel towards east axis
 x_f = repmat(1000,m,1);
 % y_f = randi(1000,m,1);

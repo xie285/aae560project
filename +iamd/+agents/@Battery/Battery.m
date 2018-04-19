@@ -146,9 +146,9 @@ classdef Battery < publicsim.agents.hierarchical.Child      & ...
             obj.last_update_time = time;
             if time == obj.sim_end_time
                 % output intercept results to command window at end of sim
-                number_of_intercepts = length(unique(obj.intercepted_missiles));
-                fprintf('Battery %d: \n', obj.battery_id)
-                fprintf('Number of Intercepts  = %d \n',number_of_intercepts)               
+%                 number_of_intercepts = length(unique(obj.intercepted_missiles));
+%                 fprintf('Battery %d: \n', obj.battery_id)
+%                 fprintf('Number of Intercepts  = %d \n',number_of_intercepts)               
                 [obj.intercepted_missile_list,ia] = unique(obj.intercepted_missiles,'stable');
                 obj.interception_times = [];
                 for i = 1:length(obj.time_of_intercept)
@@ -159,24 +159,44 @@ classdef Battery < publicsim.agents.hierarchical.Child      & ...
                     end
                 end
 
-                ids = sprintf('%d ',obj.intercepted_missile_list);
-                toi = sprintf('%d ',obj.interception_times);
-                fprintf('Intercepted MissileID = %s \n',ids)
-                fprintf('Interception Times = %s \n', toi)
-                data = [obj.intercepted_missile_list; obj.interception_times];
-                    
-                if obj.battery_id == 1
-                    fileID = fopen('+iamd/+models/data/battery.txt','w');
-                    fprintf(fileID, 'Battery Data: Intercepted Missile IDs and Interception Times\r\n\r\n');
-                    fprintf(fileID, 'Battery1 \r\n');
-                    fprintf(fileID,'%d  %d \r\n',data);
-                    fclose(fileID);
-                else
-                    fileID = fopen('+iamd/+models/data/battery.txt','a');
-                    fprintf(fileID, '\r\nBattery%d \r\n', obj.battery_id);
-                    fprintf(fileID,'%d  %d \r\n',data);
-                    fclose(fileID);
+%                 ids = sprintf('%d ',obj.intercepted_missile_list);
+%                 toi = sprintf('%d ',obj.interception_times);
+%                 fprintf('Intercepted MissileID = %s \n',ids)
+%                 fprintf('Interception Times = %s \n', toi)
+                data_battery = [obj.intercepted_missile_list' obj.interception_times'];
+                
+                filename = '+iamd/test_data.xlsx';
+                switch obj.battery_id
+                    case 1
+                        if ~isempty(data_battery)
+                            xlswrite(filename,data_battery,'Battery Data','A3')
+                        end
+                    case 2
+                        if ~isempty(data_battery)
+                            xlswrite(filename,data_battery,'Battery Data','C3')
+                        end
+                    case 3
+                        if ~isempty(data_battery)
+                            xlswrite(filename,data_battery,'Battery Data','E3')
+                        end
+                    case 4
+                        if ~isempty(data_battery)
+                            xlswrite(filename,data_battery,'Battery Data','G3')
+                        end
                 end
+                    
+%                 if obj.battery_id == 1
+%                     fileID = fopen('+iamd/+models/data/battery.txt','w');
+%                     fprintf(fileID, 'Battery Data: Intercepted Missile IDs and Interception Times\r\n\r\n');
+%                     fprintf(fileID, 'Battery1 \r\n');
+%                     fprintf(fileID,'%d  %d \r\n',data);
+%                     fclose(fileID);
+%                 else
+%                     fileID = fopen('+iamd/+models/data/battery.txt','a');
+%                     fprintf(fileID, '\r\nBattery%d \r\n', obj.battery_id);
+%                     fprintf(fileID,'%d  %d \r\n',data);
+%                     fclose(fileID);
+%                 end
             end
         end
         
