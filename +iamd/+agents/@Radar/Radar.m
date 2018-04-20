@@ -312,7 +312,7 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
         end
         
         function selfEffectiveness(obj,SE)
-            obj.pDetect_normal = 0.3 * SE;
+            obj.pDetect_normal = 0.5 * SE;
             obj.pDetect_alert = SE;
             obj.pBroadcast = SE;
             obj.pReceiveCommunications = SE;

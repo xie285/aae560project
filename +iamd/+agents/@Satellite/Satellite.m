@@ -203,7 +203,7 @@ classdef Satellite <  publicsim.agents.hierarchical.Child   & ...
         end
         
         function selfEffectiveness(obj,SE)
-            obj.pDetect = 0.2*SE;
+            obj.pDetect = 0.4*SE;
             obj.pBroadcast = SE;
         end
         
