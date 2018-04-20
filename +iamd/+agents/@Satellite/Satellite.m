@@ -140,13 +140,12 @@ classdef Satellite <  publicsim.agents.hierarchical.Child   & ...
             if time == obj.sim_end_time
                 data_satellite = [obj.time_of_broadcast_list' obj.num_cues'];
                 filename = '+iamd/test_data.xlsx';
+                text = {'Missile ID','Cues'};
+                xlswrite(filename,text,'Satellite Data','A1')
                 if ~isempty(data_satellite)
-                    xlswrite(filename,data_satellite,'Satellite Data','A3');
+                    xlswrite(filename,data_satellite,'Satellite Data','A2');
                 end
-%                 fileID = fopen('+iamd/+models/data/satellite.txt','w');
-%                 fprintf(fileID, 'Satellite 1 Data: Time vs Number of Cues Successfully sent\r\n\r\n');
-%                 fprintf(fileID,'%d  %d \r\n',data);
-%                 fclose(fileID);
+
             end
             
         end
@@ -171,37 +170,6 @@ classdef Satellite <  publicsim.agents.hierarchical.Child   & ...
                             obj.missile_id_cue = obj.missile_id_cue(~cellfun('isempty',obj.missile_id_cue));
                             obj.missile_vector_cue = obj.missile_vector_cue(~cellfun('isempty',obj.missile_vector_cue));
 
-%                             obj.broadcastDetectedMissiles()
-%                         end
-%                         switch obj.status
-%                             case {'normal'}
-%                                 if randi(100,1,1) <= obj.pDetect_normal
-%                                     obj.missile_location_cue{kk}        = msg{ii}.missile_location;
-%                                     obj.missile_id_cue{kk}              = msg{ii}.missile_id;
-%                                     obj.missile_vector_cue{kk}          = msg{ii}.missile_vector;
-%                                     
-%                                     % remove empty cell array contents
-%                                     obj.missile_location_cue = obj.missile_location_cue(~cellfun('isempty',obj.missile_location_cue));
-%                                     obj.missile_id_cue = obj.missile_id_cue(~cellfun('isempty',obj.missile_id_cue));
-%                                     obj.missile_vector_cue = obj.missile_vector_cue(~cellfun('isempty',obj.missile_vector_cue));
-% 
-%                                     obj.broadcastDetectedMissiles()
-%                                 end
-%                             case {'hacked'}
-%                                 if randi(100,1,1) <= obj.pDetect_hacked
-%                                     obj.missile_location_cue{kk}        = msg{ii}.missile_location;
-%                                     obj.missile_id_cue{kk}              = msg{ii}.missile_id;
-%                                     obj.missile_vector_cue{kk}          = msg{ii}.missile_vector;
-%                                     
-%                                     % remove empty cell array contents
-%                                     obj.missile_location_cue = obj.missile_location_cue(~cellfun('isempty',obj.missile_location_cue));
-%                                     obj.missile_id_cue = obj.missile_id_cue(~cellfun('isempty',obj.missile_id_cue));
-%                                     obj.missile_vector_cue = obj.missile_vector_cue(~cellfun('isempty',obj.missile_vector_cue));
-%                                     if randi(100,1,1) <= obj.pBroadcast_hacked
-%                                         obj.broadcastDetectedMissiles()
-%                                     end
-%                                 end
-%                         end
                         kk = kk+1;
                     end
                 end
@@ -216,20 +184,10 @@ classdef Satellite <  publicsim.agents.hierarchical.Child   & ...
             msg.missile_location_cue        = obj.missile_location_cue;
             msg.missile_id_cue              = obj.missile_id_cue;
             msg.missile_vector_cue          = obj.missile_vector_cue;
-            
-%             switch obj.status
-%                 case 'normal'
+
             if randi(100,1,1) <= obj.pBroadcast
                 obj.publishToTopic(obj.satellite_broad_topic,msg);
             end
-%                     if randi(100,1,1) <= obj.pBroadcast_normal
-%                         obj.publishToTopic(obj.satellite_broad_topic,msg);
-%                     end
-%                 case 'hacked'
-%                     if randi(100,1,1) <= obj.pBroadcast_hacked
-%                         obj.publishToTopic(obj.satellite_broad_topic,msg);
-%                     end
-%             end
             
         end
         

@@ -23,16 +23,16 @@ sim_end_time            = xlsread('+iamd/+models/inputs2.xlsx','Simulation','B2'
 % randomly spawn missiles at y-axis
 m = length(missileAgents);
 x_i = zeros(m,1);
-% y_i = randi(1000,m,1);
-y_i = [539 336 325 230 5 688 753 339 470 798]';
+y_i = randi(1000,m,1);
+% y_i = [539 336 325 230 5 688 753 339 470 798]';
 z_i = zeros(m,1);
 % origin matrix
 missile_start_locations = [x_i y_i z_i];
 missile_spawn_times = (0:m-1)*10;%[0 10 20 30 40 50 60 70 80 90 100]';
 % missiles travel towards east axis
 x_f = repmat(1000,m,1);
-% y_f = randi(1000,m,1);
-y_f = [648 23 284 955 884 326 911 480 203 272]';
+y_f = randi(1000,m,1);
+% y_f = [648 23 284 955 884 326 911 480 203 272]';
 z_f = zeros(m,1);
 missile_end_locations = [x_f y_f z_f];
 

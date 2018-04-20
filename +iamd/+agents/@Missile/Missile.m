@@ -93,6 +93,11 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
                 % check if missile has been shot down by battery
                 obj.isIntercepted();
                 
+                % if missile has reached other sid eof map, remove it 
+                if obj.location(1) >= obj.destination(1)
+                    obj.isDestroyed = 1;
+                end
+                
                 if obj.isDestroyed == 0
                     obj.detectable();
 
@@ -100,22 +105,17 @@ classdef Missile < publicsim.agents.hierarchical.Child  &...
                     plot_info.missile_id = obj.missile_id;
                     plot_info.status = obj.status;
                     obj.plotter.updatePlot(obj.location,plot_info);
-                    
-                    
+                
                     updateLocation(obj,time_since_update)
                     
                     obj.scheduleAtTime(time+1)
                 end
-
-                    
-                                                             
+                                                          
             end
            
             % record last time step stamp
             obj.last_update_time = time;
         end
-        
-
         
         function updateLocation(obj,time_since_update)
             obj.setDirection(obj.destination)

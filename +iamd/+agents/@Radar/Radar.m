@@ -189,32 +189,23 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
                 
                 data_radar = [obj.detected_missiles' obj.time_of_detect'];
                 filename = '+iamd/test_data.xlsx';
+                text = {'Missile ID','Detect Times','Missile ID','Detect Times','Missile ID','Detect Times'};
+                xlswrite(filename,text,'Radar Data','A1')
                 switch obj.radar_id
                     case 1
                         if ~isempty(data_radar)
-                            xlswrite(filename,data_radar,'Radar Data','A3')
+                            xlswrite(filename,data_radar,'Radar Data','A2')
                         end
                     case 2
                         if ~isempty(data_radar)
-                            xlswrite(filename,data_radar,'Radar Data','C3')
+                            xlswrite(filename,data_radar,'Radar Data','C2')
                         end
                     case 3
                         if ~isempty(data_radar)
-                            xlswrite(filename,data_radar,'Radar Data','E3')
+                            xlswrite(filename,data_radar,'Radar Data','E2')
                         end
                 end
-%                 if obj.radar_id == 1
-%                     fileID = fopen('+iamd/+models/data/radar.txt','w');
-%                     fprintf(fileID, 'Radar Data: Detected Missile ID and Time of Detect\r\n\r\n');
-%                     fprintf(fileID, 'Radar1 \r\n');
-%                     fprintf(fileID,'%d  %d \r\n',data);
-%                     fclose(fileID);
-%                 else
-%                     fileID = fopen('+iamd/+models/data/radar.txt','a');
-%                     fprintf(fileID, '\r\nRadar%d \r\n', obj.radar_id);
-%                     fprintf(fileID,'%d  %d \r\n',data);
-%                     fclose(fileID);
-%                 end
+
             end
             
         end       
@@ -284,10 +275,7 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
             msg.missile_vector              = obj.missile_vector;
 
             obj.publishToTopic(obj.radar_broad_topic,msg);
-  
-            % rest messages
-%             obj.missile_id = {}; 
-%             obj.missile_location = {};          
+       
         end
         
         function broadcastRadarStatus(obj)
@@ -324,7 +312,7 @@ classdef Radar <  publicsim.agents.hierarchical.Child       & ...
         end
         
         function selfEffectiveness(obj,SE)
-            obj.pDetect_normal = 0.2 * SE;
+            obj.pDetect_normal = 0.3 * SE;
             obj.pDetect_alert = SE;
             obj.pBroadcast = SE;
             obj.pReceiveCommunications = SE;

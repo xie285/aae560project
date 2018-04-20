@@ -1,7 +1,6 @@
-function Analysis(num_missiles)
+function [avgTTD, avgTTA, numIntercepts, numCues] =  Analysis(num_missiles)
 % avgTTD: average time for radar to detect since launch of missile
-% avgTTI: average time for battery to intercept missile since time of
-% detect
+% avgTTI: average time for battery to intercept missile 
 % avgTTA: average time for command to issue out target assignments
     
     % import radar data
@@ -21,24 +20,16 @@ function Analysis(num_missiles)
     radar_data = [radar1_data; radar2_data; radar3_data];
     battery_data = [battery1_data; battery2_data; battery3_data; battery4_data];
     
-    % should do something here so that it takes missile info straight from
-    % setupScenario and missile agents.....
-    missile_start_loc = [539 336 325 230 5 688 753 339 470 798]';
-    missile_end_loc = [648 23 284 955 884 326 911 480 203 272]';
-    missile_cruise_speed = 20;
-    
-    maxTraverseTime = calculateTimeOfTraverse(missile_start_loc,missile_end_loc,missile_cruise_speed);
-    
     numIntercepts = batteryPerformance(battery_data);
-    [avgTTD, radarOP] = radarPerformance(radar_data,maxTraverseTime,num_missiles)
-    [avgTTA,commandOP] = commandPerformance(command_data,maxTraverseTime,num_missiles)
+    avgTTD = radarPerformance(radar_data,num_missiles);
+    avgTTA = commandPerformance(command_data,num_missiles);
     numCues = satellitePerformance(satellite_data);
-    batteryOP = 100 * numIntercepts/num_missiles
-    satelliteOP = 100 * numCues/num_missiles
+    batteryOP = 100 * numIntercepts/num_missiles;
+    satelliteOP = 100 * numCues/num_missiles;
               
 end
 
-function [average_TTD,radar_operability] = radarPerformance(radar_data,maxTraverseTime,num_missiles)      
+function average_TTD = radarPerformance(radar_data,num_missiles)      
         sorted_radar_data = sortrows(radar_data);
         
     if ~isempty(sorted_radar_data)    
@@ -55,17 +46,17 @@ function [average_TTD,radar_operability] = radarPerformance(radar_data,maxTraver
         time_to_detect = [];
     end
     
-    % penalize average detect time for any undetected missiles by adding
-    % a penalty factor equal to duration of the simulation
+    % add penalty time of 70.71 calculated as max time for missile to
+    % travel from one corner of map to the other
     if num_detects < num_missiles
         for n = 1:num_missiles-num_detects
-            time_to_detect = [time_to_detect;maxTraverseTime];
+            time_to_detect = [time_to_detect;70.71];
         end
     end
 %     time_to_detect'
     average_TTD = mean(time_to_detect); % average Time To Detect
-    best_average = 16.1; % calculated from run with ideal SEs
-    radar_operability = 100 * (average_TTD - maxTraverseTime)/(best_average - maxTraverseTime);
+%     best_average = 16.1; % calculated from run with ideal SEs
+%     radar_operability = 100 * (average_TTD - maxTraverseTime)/(best_average - maxTraverseTime);
     %100 * mean((time_to_detect - traverseTime') ./ (best_times_to_detect - traverseTime'));
   
 end
@@ -84,7 +75,7 @@ function number_of_intercepts = batteryPerformance(battery_data)
 
 end
 
-function [average_TTA,command_operability] = commandPerformance(command_data,maxTraverseTime,num_missiles)
+function average_TTA = commandPerformance(command_data,num_missiles)
     command_data = sortrows(command_data);
     time_to_assignment = zeros(size(command_data,1),1);
     if ~isempty(command_data)
@@ -95,15 +86,17 @@ function [average_TTA,command_operability] = commandPerformance(command_data,max
         time_to_assignment = command_data(:,2) - missile_launch_times';
     end
     number_of_assignments = size(command_data,1);
+    % add penalty time of 70.71 calculated as max time for missile to
+    % travel from one corner of map to the other
     if number_of_assignments < num_missiles
         for n = 1:num_missiles-number_of_assignments
-            time_to_assignment = [time_to_assignment; maxTraverseTime];
+            time_to_assignment = [time_to_assignment; 70.71];
         end
     end   
 
     average_TTA = mean(time_to_assignment);
-    best_time_average = 17.1;
-    command_operability = 100 * (average_TTA - maxTraverseTime) / (best_time_average - maxTraverseTime);%100 * mean((time_to_assignment - traverseTime') ./ (best_times_to_assignment - traverseTime'));
+%     best_time_average = 17.1;
+%     command_operability = 100 * (average_TTA - maxTraverseTime) / (best_time_average - maxTraverseTime);%100 * mean((time_to_assignment - traverseTime') ./ (best_times_to_assignment - traverseTime'));
 end
 
 function numberOfSuccessfulCuesSent = satellitePerformance(satellite_data)
@@ -133,36 +126,36 @@ function numberOfSuccessfulCuesSent = satellitePerformance(satellite_data)
 %     scatter(unqt,unq)
 end
 
-function [maxTraverseTime,avgTraverseTime,traverseTime] = calculateTimeOfTraverse(missile_start,missile_end,missile_speed)
-    y_i = missile_start;
-    y_f = missile_end;
-    m = (y_f-y_i)/1000;
-    radar_locations = [669 121;483 371; 477 753];
-    range = 250;
-    cruise_speed = missile_speed;
-    for i = 1:length(y_i)
-        if i == 2 || i == 3 || i == 6 || i == 9 || i == 10
-            p = radar_locations(1,1);
-            q = radar_locations(1,2);
-        elseif i == 5 || i == 8
-            p = radar_locations(2,1);
-            q = radar_locations(2,2);
-        else
-            p = radar_locations(3,1);
-            q = radar_locations(3,2);
-        end
-        A = m(i)^2 + 1;
-        B = 2*(m(i)*y_i(i) - m(i)*q - p);
-        C = q^2 - range^2 + p^2 - 2*y_i(i)*q + y_i(i)^2;
-        x(i) = real((-B + sqrt(B^2 - 4*A*C))/(2*A));
-        y(i) = m(i)*x(i) + y_i(i);
-        max_dist(i) = sqrt(x(i)^2 + (y(i)-y_i(i))^2);       
-    end
-    traverseTime = max_dist/cruise_speed;
-    
-    avgTraverseTime = mean(max_dist/cruise_speed);
-    maxTraverseTime = max(max_dist/cruise_speed);
-end
+% function [maxTraverseTime,avgTraverseTime,traverseTime] = calculateTimeOfTraverse(missile_start,missile_end,missile_speed)
+%     y_i = missile_start;
+%     y_f = missile_end;
+%     m = (y_f-y_i)/1000;
+%     radar_locations = [669 121;483 371; 477 753];
+%     range = 250;
+%     cruise_speed = missile_speed;
+%     for i = 1:length(y_i)
+%         if i == 2 || i == 3 || i == 6 || i == 9 || i == 10
+%             p = radar_locations(1,1);
+%             q = radar_locations(1,2);
+%         elseif i == 5 || i == 8
+%             p = radar_locations(2,1);
+%             q = radar_locations(2,2);
+%         else
+%             p = radar_locations(3,1);
+%             q = radar_locations(3,2);
+%         end
+%         A = m(i)^2 + 1;
+%         B = 2*(m(i)*y_i(i) - m(i)*q - p);
+%         C = q^2 - range^2 + p^2 - 2*y_i(i)*q + y_i(i)^2;
+%         x(i) = real((-B + sqrt(B^2 - 4*A*C))/(2*A));
+%         y(i) = m(i)*x(i) + y_i(i);
+%         max_dist(i) = sqrt(x(i)^2 + (y(i)-y_i(i))^2);       
+%     end
+%     traverseTime = max_dist/cruise_speed;
+%     
+%     avgTraverseTime = mean(max_dist/cruise_speed);
+%     maxTraverseTime = max(max_dist/cruise_speed);
+% end
 
 % function maxTraverseTimeBatt = calculateMaxTimeOfTraverseBatt(missile_start,missile_end,missile_speed)
 %     y_i = missile_start;

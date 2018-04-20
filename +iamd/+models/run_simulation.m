@@ -1,6 +1,7 @@
 function run_simulation(log_path)
 
 clear all; close all; clc;
+delete('+iamd/test_data.xlsx')
 import publicsim.*;
 
 logpath = './tmp/scenario';
@@ -44,5 +45,8 @@ logger.restore()
 
 
 % post processing
-iamd.analysis.Analysis(num_mis)
+[avgTTD, avgTTA, numIntercepts, numCues] = iamd.analysis.Analysis(num_mis);
+fileID = fopen('+iamd/Results.txt','a');
+fprintf(fileID,'%f  %f  %f  %f\r\n',avgTTD,avgTTA,numIntercepts,numCues);
+fclose(fileID);
 end
