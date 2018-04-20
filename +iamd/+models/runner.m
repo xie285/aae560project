@@ -26,7 +26,7 @@ switch system
         end
     case 'Interceptor'
         for SE = 0:10:90
-            xlswrite(inputfilename,SE,'Friendly','Z2')
+            xlswrite(inputfilename,SE,'Friendly','Z2:Z5')
                 for i = 1:ntrials
                     iamd.models.run_simulation()
                 end
