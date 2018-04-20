@@ -1,4 +1,4 @@
-function [avgTTD, avgTTA, numIntercepts, numCues] =  Analysis(num_missiles)
+function [avgTTD, avgTTA, avgTTI, numIntercepts, numCues] =  Analysis(num_missiles)
 % avgTTD: average time for radar to detect since launch of missile
 % avgTTI: average time for battery to intercept missile 
 % avgTTA: average time for command to issue out target assignments
@@ -20,7 +20,7 @@ function [avgTTD, avgTTA, numIntercepts, numCues] =  Analysis(num_missiles)
     radar_data = [radar1_data; radar2_data; radar3_data];
     battery_data = [battery1_data; battery2_data; battery3_data; battery4_data];
     
-    numIntercepts = batteryPerformance(battery_data);
+    [avgTTI,numIntercepts] = batteryPerformance(battery_data,num_missiles);
     avgTTD = radarPerformance(radar_data,num_missiles);
     avgTTA = commandPerformance(command_data,num_missiles);
     numCues = satellitePerformance(satellite_data);
@@ -61,9 +61,9 @@ function average_TTD = radarPerformance(radar_data,num_missiles)
   
 end
 
-function number_of_intercepts = batteryPerformance(battery_data)
+function [average_TTI,number_of_intercepts] = batteryPerformance(battery_data,num_missiles)
     battery_data = sortrows(battery_data);
-
+    time_to_intercept = zeros(size(battery_data,1),1);
     if ~isempty(battery_data)
         missile_launch_times = zeros(length(battery_data),1)';
         for i = 1:length(battery_data)
@@ -72,6 +72,11 @@ function number_of_intercepts = batteryPerformance(battery_data)
     time_to_intercept = battery_data(:,2) - missile_launch_times';
     end  
     number_of_intercepts = size(battery_data,1);
+    if number_of_intercepts < num_missiles
+        time_to_intercept = [time_to_intercept; 70.71];
+    end
+    
+    average_TTI = mean(time_to_intercept);
 
 end
 

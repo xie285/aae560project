@@ -45,8 +45,8 @@ logger.restore()
 
 
 % post processing
-[avgTTD, avgTTA, numIntercepts, numCues] = iamd.analysis.Analysis(num_mis);
+[avgTTD, avgTTA, avgTTI, numIntercepts, numCues] = iamd.analysis.Analysis(num_mis);
 fileID = fopen('+iamd/Results.txt','a');
-fprintf(fileID,'%f  %f  %f  %f\r\n',avgTTD,avgTTA,numIntercepts,numCues);
+fprintf(fileID,'%f  %f  %f  %f %f\r\n',avgTTD,avgTTA,avgTTI,numIntercepts,numCues);
 fclose(fileID);
 end
